@@ -1,5 +1,20 @@
 import React from "react";
+import { Route, Switch } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+
 import axiosInstance from './axiosInstance';
+import { SearchMovie } from './SearchMovie';
+
+function Home(props) {
+  return (
+    <div>
+      <Helmet>
+        <title>My Top 100 Movies</title>
+      </Helmet>
+      {props.message}
+    </div>
+  )
+}
 
 class App extends React.Component {
   constructor(props) {
@@ -8,6 +23,7 @@ class App extends React.Component {
       message: '',
     }
   }
+
   componentDidMount() {
     axiosInstance.get('/')
       .then(response => {
@@ -18,10 +34,18 @@ class App extends React.Component {
         throw err;
       })
   }
+
   render() {
     return (
       <div>
-        {this.state.message}
+        <Switch>
+          <Route exact path="/">
+            <Home message={this.state.message} />
+          </Route>
+          <Route path="/search/">
+            <SearchMovie />
+          </Route>
+        </Switch>
       </div>
     )
   }
