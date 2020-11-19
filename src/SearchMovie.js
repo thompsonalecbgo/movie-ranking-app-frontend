@@ -1,38 +1,39 @@
 import React from "react";
 import { Helmet } from "react-helmet";
-
-const results = [
-  {
-    id: 1,
-    name: "Titanic",
-  },
-];
-
-function SearchResults(props) {
-  return (
-    <ul id="search-results">
-      {props.results.map((result) => (
-        <li key={result.id.toString()}>
-          {result.name}
-        </li>
-      ))}
-    </ul>
-  );
-}
+import axios from "axios";
 
 class SearchForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { query: "" };
+    this.state = {
+      query: "",
+      typing: false,
+      typingTimeout: 0,
+    };
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(e) {
-    e.preventDefault();
-    this.setState({ query: e.target.value });
-    if (this.props.getQuery) {
-      this.props.getQuery(e.target.value);
+    this.setState({ typing: true });
+
+    if (this.state.typingTimeout) {
+      clearTimeout(this.state.typingTimeout);
     }
+
+    this.setState({
+      query: e.target.value,
+      typing: false,
+      typingTimeout: setTimeout(() => {
+        if (this.props.getResults) {
+          this.props.getResults(e.target.value);
+        }
+      }, 500),
+    });
+
+    // this.setState({ query: e.target.value });
+    // if (this.props.getResults) {
+    //   this.props.getResults(e.target.value);
+    // }
   }
 
   handleSubmit(e) {
@@ -59,19 +60,58 @@ class SearchForm extends React.Component {
   }
 }
 
+const TMDBApiKey = "ff8183068c00734a3d6c9ae5281fe108";
+
+// const results = [
+//   {
+//     id: 1,
+//     title: "Titanic",
+//   },
+// ];
+
+function extractDate(dateText) {
+  return new Date(dateText).getFullYear();
+}
+
+function SearchResults(props) {
+  return (
+    <ul id="search-results">
+      {props.results.map((result) => (
+        <li key={result.id.toString()}>
+          <a href="#">
+            <img src={`https://image.tmdb.org/t/p/w200${result.poster_path}`} />
+            {result.title} ({extractDate(result.release_date)})
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 class SearchMovie extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       query: "",
-      results,
+      results: [],
     };
-    this.getQuery = this.getQuery.bind(this);
+    this.getResults = this.getResults.bind(this);
   }
 
-  getQuery(query) {
+  async getResults(query) {
     this.setState({ query });
-    console.log(query);
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDBApiKey}&language=en-US&query=${query}`;
+    if (query) {
+      try {
+        const response = await axios.get(url);
+        const results = response.data.results.slice(0, 5);
+        this.setState({ results });
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      this.setState({ results: [] });
+    }
   }
 
   render() {
@@ -80,7 +120,7 @@ class SearchMovie extends React.Component {
         <Helmet>
           <title>Search Movie</title>
         </Helmet>
-        <SearchForm getQuery={this.getQuery} />
+        <SearchForm getResults={this.getResults} />
         <SearchResults results={this.state.results} />
       </div>
     );

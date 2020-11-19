@@ -1,38 +1,39 @@
 import React from "react";
-import { Route, Switch } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Route, Switch } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
-import axiosInstance from './axiosInstance';
-import { SearchMovie } from './SearchMovie';
+import axiosInstance from "./axiosInstance";
+import { SearchMovie } from "./SearchMovie";
 
 function Home(props) {
   return (
-    <div>
+    <div id="welcome">
       <Helmet>
         <title>My Top 100 Movies</title>
       </Helmet>
       {props.message}
     </div>
-  )
+  );
 }
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      message: '',
-    }
+      message: "",
+    };
   }
 
   componentDidMount() {
-    axiosInstance.get('/')
-      .then(response => {
-        console.log(response)
-        this.setState({message: response.data.message})
+    axiosInstance
+      .get("/")
+      .then((response) => {
+        console.log(response);
+        this.setState({ message: response.data.message });
       })
-      .catch(err => {
-        throw err;
-      })
+      .catch((error) => {
+        console.log(error.message)
+      });
   }
 
   render() {
@@ -47,7 +48,7 @@ class App extends React.Component {
           </Route>
         </Switch>
       </div>
-    )
+    );
   }
 }
 
