@@ -42,8 +42,10 @@ class TopMoviesInternal extends React.Component {
     this.state = {
       id: "",
       movies: [],
+      showMovies: true,
     };
     this.getSelected = this.getSelected.bind(this);
+    this.toggleMovies = this.toggleMovies.bind(this);
   }
 
   componentDidMount() {
@@ -62,7 +64,18 @@ class TopMoviesInternal extends React.Component {
   getSelected(selected) {
     const topMovies = selected.top_movies
     const movies = topMovies.movie
-    this.setState({ movies });
+    this.setState({ 
+      movies, 
+      showMovies: true 
+    });
+  }
+
+  toggleMovies(isShowingResults) {
+    if (isShowingResults) {
+      this.setState({ showMovies: false })
+    } else {
+      this.setState({ showMovies: true })
+    }
   }
 
   render() {
@@ -71,10 +84,11 @@ class TopMoviesInternal extends React.Component {
         <SearchMovie
           action={`/top-movies/${this.state.id}/add/`}
           getSelected={this.getSelected}
+          isShowingResults={this.toggleMovies}
         />
-        <Movies 
-          movies={this.state.movies}
-        />
+        {
+          this.state.showMovies && <Movies movies={this.state.movies} />
+        }
       </div>
     );
   }

@@ -2,9 +2,15 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
+import { useSelector, useDispatch } from 'react-redux'
 
 import axiosInstance from "./axiosInstance";
 import { extractDate } from "./utils";
+import {
+  show as showPartialResults,
+  hide as hidePartialResults,
+  selectIsShown as selectIsPartialResultsShown,
+} from '../features/partialResultsSlice';
 
 const TMDBApiKey = "ff8183068c00734a3d6c9ae5281fe108";
 
@@ -19,16 +25,19 @@ class SearchForm extends React.Component {
   handleChange(e) {
     this.setState({ value: e.target.value });
     if (this.props.getValue) {
-      this.props.getValue(e.target.value)
+      this.props.getValue(e.target.value);
     }
   }
   handleSubmit(e) {
     e.preventDefault();
+    if (this.props.onSubmit) {
+      this.props.onSubmit();
+    }
   }
-  clearInput(){
-    this.setState = { value: "" };
+  clearInput() {
+    this.setState({ value: "" });
     if (this.props.getValue) {
-      this.props.getValue("")
+      this.props.getValue("");
     }
   }
   render() {
@@ -44,7 +53,7 @@ class SearchForm extends React.Component {
             onChange={this.handleChange}
           />
         </label>
-        <input type="submit" value="Search" />
+        <input type="submit" value="Search" id="search-button" />
       </form>
     );
   }
@@ -66,7 +75,24 @@ function SearchResult(props) {
 }
 
 function PartialSearchResults(props) {
-  const results = props.results.slice(0, 5)
+  const results = props.results.slice(0, 5);
+  return (
+    <div>
+      <ul id="partial-search-results">
+        {results.map((result) => (
+          <SearchResult
+            key={result.id.toString()}
+            value={result}
+            onClick={() => props.onClick(result)}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SearchResults(props) {
+  const results = props.results;
   return (
     <div>
       <ul id="search-results">
@@ -88,11 +114,15 @@ class SearchMovieInternal extends React.Component {
     this.state = {
       query: "",
       typingTimeout: "",
+      showPartialResults: false,
       results: [],
+      showResults: false,
+      lastResults: [],
     };
     this.getQuery = this.getQuery.bind(this);
     this.getResults = this.getResults.bind(this);
     this.onClickResult = this.onClickResult.bind(this);
+    this.onSearch = this.onSearch.bind(this);
     this.searchFormRef = React.createRef();
   }
 
@@ -100,15 +130,19 @@ class SearchMovieInternal extends React.Component {
     if (this.state.typingTimeout) {
       clearTimeout(this.state.typingTimeout);
     }
-    this.setState({ query })
+    this.setState({ query });
     if (query) {
       this.setState({
+        showPartialResults: true,
         typingTimeout: setTimeout(() => {
           this.getResults(query);
-        }, 250),
-      })
+        }, 500),
+      });
     } else {
-      this.setState({ results: [] });
+      this.setState({
+        showPartialResults: false,
+        results: [],
+      });
     }
   }
 
@@ -133,14 +167,29 @@ class SearchMovieInternal extends React.Component {
       })
       .then((response) => {
         this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
-        this.searchFormRef.current.clearInput();
         if (this.props.getSelected) {
-          this.props.getSelected(response.data)
+          this.props.getSelected(response.data);
         }
+        this.searchFormRef.current.clearInput();
+        this.setState({ showResults: false })
       })
       .catch((error) => {
         console.log(error.message);
       });
+  }
+
+  onSearch() {
+    // alert("clicked")
+    this.getResults(this.state.query).then((res) => {
+      this.setState((state) => ({
+        showPartialResults: false,
+        showResults: true,
+        lastResults: state.results,
+      }));
+      if (this.props.isShowingResults) {
+        this.props.isShowingResults(true);
+      }
+    });
   }
 
   render() {
@@ -149,14 +198,23 @@ class SearchMovieInternal extends React.Component {
         <Helmet>
           <title>Search Movie</title>
         </Helmet>
-        <SearchForm 
+        <SearchForm
           ref={this.searchFormRef}
           getValue={this.getQuery}
+          onSubmit={this.onSearch}
         />
-        <PartialSearchResults
-          results={this.state.results}
-          onClick={this.onClickResult}
-        />
+        {this.state.showPartialResults && (
+          <PartialSearchResults
+            results={this.state.results}
+            onClick={this.onClickResult}
+          />
+        )}
+        {this.state.showResults && (
+          <SearchResults
+            results={this.state.lastResults}
+            onClick={this.onClickResult}
+          />
+        )}
       </div>
     );
   }
