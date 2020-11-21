@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 
 import axiosInstance from "./axiosInstance";
 import { extractDate } from "./utils";
-import { SearchMovie } from './SearchMovie';
+import { SearchMovie } from "./SearchMovie";
 
 function Movie(props) {
   const movie = props.value;
@@ -11,7 +11,7 @@ function Movie(props) {
   const release_date = extractDate(movie.release_date);
   const poster_path = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
   return (
-    <li onClick={props.onClick}>
+    <li>
       <div>
         {/* <img alt={title} src={poster_path} /> */}
         {title} ({release_date})
@@ -20,50 +20,60 @@ function Movie(props) {
   );
 }
 
+function Movies(props) {
+  return (
+    <div>
+      <ul id="top-movies">
+        {props.movies.map((movie) => (
+          <Movie
+            key={movie.id.toString()}
+            value={movie}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 class TopMoviesInternal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      topMoviesId: "",
-      topMovies: [],
+      id: "",
+      movies: [],
     };
-    this.onClick = this.onClick.bind(this);
+    this.getSelected = this.getSelected.bind(this);
   }
 
   componentDidMount() {
     const id = this.props.match.params.id;
-    this.setState({ topMoviesId: id });
+    this.setState({ id });
     axiosInstance
       .get(`/top-movies/${id}/`)
       .then((response) => {
-        console.log(response);
-        this.setState({ topMovies: response.data.movie });
+        this.setState({ movies: response.data.movie });
       })
       .catch((error) => {
         console.log(error.message);
       });
   }
 
-  onClick(movies) {
-    this.setState({ topMovies: movies})
+  getSelected(selected) {
+    const topMovies = selected.top_movies
+    const movies = topMovies.movie
+    this.setState({ movies });
   }
 
   render() {
     return (
       <div>
-        <SearchMovie 
-          action={`/top-movies/${this.state.topMoviesId}/add/`}
-          onClick={this.onClick}
+        <SearchMovie
+          action={`/top-movies/${this.state.id}/add/`}
+          getSelected={this.getSelected}
         />
-        <ul id="top-movies">
-          {this.state.topMovies.map((movie) => (
-            <Movie
-              key={movie.id.toString()}
-              value={movie}
-              onClick={() => this.onClickMovie(movie)}
-            />
-          ))}
-        </ul>
+        <Movies 
+          movies={this.state.movies}
+        />
       </div>
     );
   }

@@ -29,7 +29,6 @@ class App extends React.Component {
     axiosInstance
       .get("/")
       .then((response) => {
-        console.log(response);
         this.setState({ message: response.data.message });
       })
       .catch((error) => {
