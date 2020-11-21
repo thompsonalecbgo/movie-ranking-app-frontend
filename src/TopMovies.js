@@ -3,6 +3,22 @@ import { withRouter } from "react-router-dom";
 
 import axiosInstance from "./axiosInstance";
 import { extractDate } from "./utils";
+import { SearchMovie } from './SearchMovie';
+
+function Movie(props) {
+  const movie = props.value;
+  const title = movie.title;
+  const release_date = extractDate(movie.release_date);
+  const poster_path = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
+  return (
+    <li onClick={props.onClick}>
+      <div>
+        {/* <img alt={title} src={poster_path} /> */}
+        {title} ({release_date})
+      </div>
+    </li>
+  );
+}
 
 class TopMoviesInternal extends React.Component {
   constructor(props) {
@@ -28,19 +44,24 @@ class TopMoviesInternal extends React.Component {
       });
   }
 
-  onClick() {}
+  onClick(movies) {
+    this.setState({ topMovies: movies})
+  }
 
   render() {
     return (
       <div>
+        <SearchMovie 
+          action={`/top-movies/${this.state.topMoviesId}/add/`}
+          onClick={this.onClick}
+        />
         <ul id="top-movies">
-          {this.state.topMovies.map((result) => (
-            <li key={result.id.toString()}>
-              <div onClick={this.onClick}>
-                {/* <img alt={result.title} src={`https://image.tmdb.org/t/p/w200${result.poster_path}`} /> */}
-                {result.title} ({extractDate(result.release_date)})
-              </div>
-            </li>
+          {this.state.topMovies.map((movie) => (
+            <Movie
+              key={movie.id.toString()}
+              value={movie}
+              onClick={() => this.onClickMovie(movie)}
+            />
           ))}
         </ul>
       </div>

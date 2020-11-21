@@ -45,7 +45,9 @@ class App extends React.Component {
             <Home message={this.state.message} />
           </Route>
           <Route path="/search/">
-            <SearchMovie />
+            <SearchMovie 
+              action="/top-movies/new/"
+            />
           </Route>
           <Route path="/top-movies/:id">
             <TopMovies />

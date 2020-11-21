@@ -13,26 +13,32 @@ class SearchForm extends React.Component {
     super(props);
     this.state = {
       query: "",
-      typing: false,
       typingTimeout: 0,
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(e) {
-    this.setState({ typing: true });
     if (this.state.typingTimeout) {
       clearTimeout(this.state.typingTimeout);
     }
+    this.props.getQuery(e.target.value);
     this.setState({
       query: e.target.value,
-      typing: false,
       typingTimeout: setTimeout(() => {
         if (this.props.getResults) {
           this.props.getResults(e.target.value);
         }
-      }, 500),
+      }, 250),
     });
+  }
+
+  clearInput() {
+    this.setState({
+      query: "",
+      typing: false,
+      typingTimeout: 0,
+    })
   }
 
   handleSubmit(e) {
@@ -59,17 +65,31 @@ class SearchForm extends React.Component {
   }
 }
 
+function SearchResult(props) {
+  const result = props.value;
+  const title = result.title;
+  const release_date = extractDate(result.release_date);
+  const poster_path = `https://image.tmdb.org/t/p/w200${result.poster_path}`;
+  return (
+    <li onClick={props.onClick}>
+      <div>
+        {/* <img alt={title} src={poster_path} /> */}
+        {title} ({release_date})
+      </div>
+    </li>
+  );
+}
+
 function SearchResults(props) {
   return (
     <div>
       <ul id="search-results">
         {props.results.map((result) => (
-          <li key={result.id.toString()}>
-            <div onClick={() => props.onClickMovie(result)}>
-              {/* <img alt={result.title} src={`https://image.tmdb.org/t/p/w200${result.poster_path}`} /> */}
-              {result.title} ({extractDate(result.release_date)})
-            </div>
-          </li>
+          <SearchResult
+            key={result.id.toString()}
+            value={result}
+            onClick={() => props.onClickMovie(result)}
+          />
         ))}
       </ul>
     </div>
@@ -85,10 +105,16 @@ class SearchMovieInternal extends React.Component {
     };
     this.getResults = this.getResults.bind(this);
     this.onClickMovie = this.onClickMovie.bind(this);
+    this.getQuery = this.getQuery.bind(this);
+    this.searchFormComponent = React.createRef();
+  }
+
+  getQuery(query) {
+    this.setState({ query })
   }
 
   async getResults(query) {
-    this.setState({ query });
+    // this.setState({ query });
     const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDBApiKey}&language=en-US&query=${query}`;
     if (query) {
       try {
@@ -105,7 +131,7 @@ class SearchMovieInternal extends React.Component {
 
   onClickMovie(movie) {
     axiosInstance
-      .post("/top-movies/new/", {
+      .post(this.props.action, {
         tmdb_id: movie.id,
         title: movie.title,
         release_date: movie.release_date,
@@ -113,8 +139,12 @@ class SearchMovieInternal extends React.Component {
       })
       .then((response) => {
         console.log(response);
-        this.props.history.push(`/top-movies/${response.data.id}/`);
-        // this.setState({ message: response.data.message });
+        this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
+        this.setState({ query: "", results: [] });
+        this.searchFormComponent.current.clearInput();
+        if (this.props.onClick) {
+          this.props.onClick(response.data.top_movies.movie)
+        }
       })
       .catch((error) => {
         console.log(error.message);
@@ -127,7 +157,11 @@ class SearchMovieInternal extends React.Component {
         <Helmet>
           <title>Search Movie</title>
         </Helmet>
-        <SearchForm getResults={this.getResults} />
+        <SearchForm 
+          ref={this.searchFormComponent}
+          getQuery={this.getQuery}
+          getResults={this.getResults}
+        />
         <SearchResults
           results={this.state.results}
           onClickMovie={this.onClickMovie}
