@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet";
 
 import axiosInstance from "./axiosInstance";
 import { SearchMovie } from "./SearchMovie";
+import { TopMovies } from "./TopMovies";
 
 function Home(props) {
   return (
@@ -32,7 +33,7 @@ class App extends React.Component {
         this.setState({ message: response.data.message });
       })
       .catch((error) => {
-        console.log(error.message)
+        console.log(error.message);
       });
   }
 
@@ -45,6 +46,9 @@ class App extends React.Component {
           </Route>
           <Route path="/search/">
             <SearchMovie />
+          </Route>
+          <Route path="/top-movies/:id">
+            <TopMovies />
           </Route>
         </Switch>
       </div>

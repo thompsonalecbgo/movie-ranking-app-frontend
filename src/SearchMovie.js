@@ -1,6 +1,12 @@
 import React from "react";
 import { Helmet } from "react-helmet";
+import { withRouter } from "react-router-dom";
 import axios from "axios";
+
+import axiosInstance from "./axiosInstance";
+import { extractDate } from "./utils";
+
+const TMDBApiKey = "ff8183068c00734a3d6c9ae5281fe108";
 
 class SearchForm extends React.Component {
   constructor(props) {
@@ -15,11 +21,9 @@ class SearchForm extends React.Component {
 
   handleChange(e) {
     this.setState({ typing: true });
-
     if (this.state.typingTimeout) {
       clearTimeout(this.state.typingTimeout);
     }
-
     this.setState({
       query: e.target.value,
       typing: false,
@@ -29,11 +33,6 @@ class SearchForm extends React.Component {
         }
       }, 500),
     });
-
-    // this.setState({ query: e.target.value });
-    // if (this.props.getResults) {
-    //   this.props.getResults(e.target.value);
-    // }
   }
 
   handleSubmit(e) {
@@ -60,35 +59,24 @@ class SearchForm extends React.Component {
   }
 }
 
-const TMDBApiKey = "ff8183068c00734a3d6c9ae5281fe108";
-
-// const results = [
-//   {
-//     id: 1,
-//     title: "Titanic",
-//   },
-// ];
-
-function extractDate(dateText) {
-  return new Date(dateText).getFullYear();
-}
-
 function SearchResults(props) {
   return (
-    <ul id="search-results">
-      {props.results.map((result) => (
-        <li key={result.id.toString()}>
-          <a href="#">
-            <img src={`https://image.tmdb.org/t/p/w200${result.poster_path}`} />
-            {result.title} ({extractDate(result.release_date)})
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div>
+      <ul id="search-results">
+        {props.results.map((result) => (
+          <li key={result.id.toString()}>
+            <div onClick={() => props.onClickMovie(result)}>
+              {/* <img alt={result.title} src={`https://image.tmdb.org/t/p/w200${result.poster_path}`} /> */}
+              {result.title} ({extractDate(result.release_date)})
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
-class SearchMovie extends React.Component {
+class SearchMovieInternal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -96,6 +84,7 @@ class SearchMovie extends React.Component {
       results: [],
     };
     this.getResults = this.getResults.bind(this);
+    this.onClickMovie = this.onClickMovie.bind(this);
   }
 
   async getResults(query) {
@@ -114,6 +103,24 @@ class SearchMovie extends React.Component {
     }
   }
 
+  onClickMovie(movie) {
+    axiosInstance
+      .post("/top-movies/new/", {
+        tmdb_id: movie.id,
+        title: movie.title,
+        release_date: movie.release_date,
+        poster_path: `https://image.tmdb.org/t/p/w200${movie.poster_path}`,
+      })
+      .then((response) => {
+        console.log(response);
+        this.props.history.push(`/top-movies/${response.data.id}/`);
+        // this.setState({ message: response.data.message });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+
   render() {
     return (
       <div>
@@ -121,10 +128,15 @@ class SearchMovie extends React.Component {
           <title>Search Movie</title>
         </Helmet>
         <SearchForm getResults={this.getResults} />
-        <SearchResults results={this.state.results} />
+        <SearchResults
+          results={this.state.results}
+          onClickMovie={this.onClickMovie}
+        />
       </div>
     );
   }
 }
+
+let SearchMovie = withRouter(SearchMovieInternal);
 
 export { SearchMovie };
