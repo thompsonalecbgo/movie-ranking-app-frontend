@@ -65,11 +65,12 @@ function SearchResult(props) {
   );
 }
 
-function SearchResults(props) {
+function PartialSearchResults(props) {
+  const results = props.results.slice(0, 5)
   return (
     <div>
       <ul id="search-results">
-        {props.results.map((result) => (
+        {results.map((result) => (
           <SearchResult
             key={result.id.toString()}
             value={result}
@@ -115,7 +116,7 @@ class SearchMovieInternal extends React.Component {
     const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDBApiKey}&language=en-US&query=${query}`;
     try {
       const response = await axios.get(url);
-      const results = response.data.results.slice(0, 5);
+      const results = response.data.results;
       this.setState({ results });
     } catch (error) {
       console.log(error);
@@ -152,7 +153,7 @@ class SearchMovieInternal extends React.Component {
           ref={this.searchFormRef}
           getValue={this.getQuery}
         />
-        <SearchResults
+        <PartialSearchResults
           results={this.state.results}
           onClick={this.onClickResult}
         />

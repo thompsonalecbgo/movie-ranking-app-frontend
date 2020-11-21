@@ -21,10 +21,11 @@ function Movie(props) {
 }
 
 function Movies(props) {
+  const movies = props.movies
   return (
     <div>
       <ul id="top-movies">
-        {props.movies.map((movie) => (
+        {movies.map((movie) => (
           <Movie
             key={movie.id.toString()}
             value={movie}
