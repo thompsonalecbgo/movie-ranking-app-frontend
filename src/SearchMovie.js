@@ -19,16 +19,16 @@ class SearchForm extends React.Component {
   handleChange(e) {
     this.setState({ value: e.target.value });
     if (this.props.getValue) {
-      this.props.getValue(e.target.value)
+      this.props.getValue(e.target.value);
     }
   }
   handleSubmit(e) {
     e.preventDefault();
   }
-  clearInput(){
+  clearInput() {
     this.setState({ value: "" });
     if (this.props.getValue) {
-      this.props.getValue("")
+      this.props.getValue("");
     }
   }
   render() {
@@ -66,7 +66,7 @@ function SearchResult(props) {
 }
 
 function SearchResults(props) {
-  const results = props.results
+  const results = props.results;
   return (
     <div>
       <ul id="search-results">
@@ -83,11 +83,7 @@ function SearchResults(props) {
 }
 
 function MovieNotFound(props) {
-  return (
-    <div>
-      Movie not found.
-    </div>
-  )
+  return <div>Movie not found.</div>;
 }
 
 class SearchMovieInternal extends React.Component {
@@ -110,16 +106,16 @@ class SearchMovieInternal extends React.Component {
     if (this.state.typingTimeout) {
       clearTimeout(this.state.typingTimeout);
     }
-    this.setState({ query })
+    this.setState({
+      query,
+      results: [],
+      showResults: false,
+      typingTimeout: setTimeout(() => {
+        this.getResults(query);
+      }, 500),
+    });
     if (query) {
-      this.setState({
-        showResults: true,
-        typingTimeout: setTimeout(() => {
-          this.getResults(query);
-        }, 500),
-      })
-    } else {
-      this.setState({ showResults: false });
+      this.setState({ showResults: true });
     }
   }
 
@@ -128,9 +124,9 @@ class SearchMovieInternal extends React.Component {
     try {
       const response = await axios.get(url);
       const results = response.data.results;
-      this.setState({ results, MovieNotFound: false });
+      this.setState({ results, movieNotFound: false });
       if (results.length === 0) {
-        this.setState({ MovieNotFound: true })
+        this.setState({ movieNotFound: true });
       }
     } catch (error) {
       console.log(error);
@@ -149,7 +145,7 @@ class SearchMovieInternal extends React.Component {
         this.searchFormRef.current.clearInput();
         this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
         if (this.props.getSelected) {
-          this.props.getSelected(response.data)
+          this.props.getSelected(response.data);
         }
       })
       .catch((error) => {
@@ -160,25 +156,16 @@ class SearchMovieInternal extends React.Component {
   render() {
     return (
       <div>
-        <Helmet>
-          <title>Search Movie</title>
-        </Helmet>
-        <SearchForm 
-          ref={this.searchFormRef}
-          getValue={this.getQuery}
-        />
-        {
-          this.state.showResults && 
+        <SearchForm ref={this.searchFormRef} getValue={this.getQuery} />
+        {this.state.showResults && (
           <SearchResults
             results={this.state.results}
             onClick={this.onClickResult}
           />
-        }
-        { 
-          this.state.showResults
-          && this.state.MovieNotFound
-          && <MovieNotFound />
-        }
+        )}
+        {this.state.showResults && this.state.movieNotFound && (
+          <MovieNotFound />
+        )}
       </div>
     );
   }

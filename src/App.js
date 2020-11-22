@@ -1,10 +1,11 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import axiosInstance from "./axiosInstance";
-import { SearchMovie } from "./SearchMovie";
+// import { SearchMovie } from "./SearchMovie";
 import { TopMovies } from "./TopMovies";
+import { TopMovieLists } from "./TopMovieLists";
 
 function Home(props) {
   return (
@@ -39,14 +40,16 @@ class App extends React.Component {
   render() {
     return (
       <div>
+        <Link to="/">Home</Link>
         <Switch>
-          <Route exact path="/">
+          {/* <Route exact path="/">
             <Home message={this.state.message} />
-          </Route>
-          <Route exact path="/search/">
-            <SearchMovie 
-              action="/top-movies/new/"
-            />
+          </Route> */}
+          <Route exact path="/">
+            <Helmet>
+              <title>Top Movies</title>
+            </Helmet>
+            <TopMovieLists />
           </Route>
           <Route path="/top-movies/:id">
             <TopMovies />
