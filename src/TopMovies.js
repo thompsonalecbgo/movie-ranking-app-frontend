@@ -10,11 +10,39 @@ function Movie(props) {
   const title = movie.title;
   const release_date = extractDate(movie.release_date);
   const poster_path = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
+  const rank = movie.rank;
   return (
     <li>
       <div>
-        {/* <img alt={title} src={poster_path} /> */}
-        {title} ({release_date})
+        <button 
+          className="move-rank-up" 
+          onClick={() => props.moveRank(movie, 'move-rank-up')}
+        >
+          Move Up
+        </button>
+        &ensp;
+        <button 
+          className="move-rank-down" 
+          onClick={() => props.moveRank(movie, 'move-rank-down')}
+        >
+          Move Down
+        </button>
+        &ensp;
+        <span className="movie-rank">
+          {rank}
+        </span>
+        &ensp;
+        <span className="movie-detail">
+          {/* <img alt={title} src={poster_path} /> */}
+          {title} ({release_date})
+        </span>
+        &ensp;
+        <button 
+          className="delete-rank" 
+          onClick={() => props.deleteRank(movie)}
+        >
+          Move Down
+        </button>
       </div>
     </li>
   );
@@ -22,6 +50,7 @@ function Movie(props) {
 
 function Movies(props) {
   const movies = props.movies
+  movies.sort((a, b) => a.rank - b.rank)
   return (
     <div>
       <ul id="top-movies">
@@ -29,6 +58,8 @@ function Movies(props) {
           <Movie
             key={movie.id.toString()}
             value={movie}
+            moveRank={props.moveRank}
+            deleteRank={props.deleteRank}
           />
         ))}
       </ul>
@@ -44,6 +75,8 @@ class TopMoviesInternal extends React.Component {
       movies: [],
     };
     this.getSelected = this.getSelected.bind(this);
+    this.moveRank = this.moveRank.bind(this);
+    this.deleteRank = this.deleteRank.bind(this);
   }
 
   componentDidMount() {
@@ -66,6 +99,35 @@ class TopMoviesInternal extends React.Component {
     this.setState({ movies });
   }
 
+  moveRank(movie, action) {
+    const movie_id = movie.id;
+    axiosInstance
+      .put(`/top-movie/${movie_id}/${action}/`)
+      .then((response) => {
+        console.log(response)
+        const topMovies = response.data.top_movies
+        const movies = topMovies.movie
+        this.setState({ movies });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+
+  deleteRank(movie) {
+    const movie_id = movie.id;
+    axiosInstance
+      .put(`/top-movie/${movie_id}/delete-rank/`)
+      .then((response) => {
+        console.log(response)
+        const movies = response.data.movie
+        this.setState({ movies });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+
   render() {
     return (
       <div>
@@ -75,6 +137,8 @@ class TopMoviesInternal extends React.Component {
         />
         <Movies 
           movies={this.state.movies}
+          moveRank={this.moveRank}
+          deleteRank={this.deleteRank}
         />
       </div>
     );
