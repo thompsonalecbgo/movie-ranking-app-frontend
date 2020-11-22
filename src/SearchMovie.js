@@ -44,7 +44,7 @@ class SearchForm extends React.Component {
             onChange={this.handleChange}
           />
         </label>
-        <input type="submit" value="Search" id="search-button" />
+        {/* <input type="submit" value="Search" id="search-button" /> */}
       </form>
     );
   }
@@ -65,11 +65,11 @@ function SearchResult(props) {
   );
 }
 
-function PartialSearchResults(props) {
-  const results = props.results.slice(0, 5)
+function SearchResults(props) {
+  const results = props.results
   return (
     <div>
-      <ul id="partial-search-results">
+      <ul id="search-results">
         {results.map((result) => (
           <SearchResult
             key={result.id.toString()}
@@ -82,6 +82,14 @@ function PartialSearchResults(props) {
   );
 }
 
+function MovieNotFound(props) {
+  return (
+    <div>
+      Movie not found.
+    </div>
+  )
+}
+
 class SearchMovieInternal extends React.Component {
   constructor(props) {
     super(props);
@@ -90,6 +98,7 @@ class SearchMovieInternal extends React.Component {
       typingTimeout: "",
       results: [],
       showResults: false,
+      movieNotFound: false,
     };
     this.getQuery = this.getQuery.bind(this);
     this.getResults = this.getResults.bind(this);
@@ -107,7 +116,7 @@ class SearchMovieInternal extends React.Component {
         showResults: true,
         typingTimeout: setTimeout(() => {
           this.getResults(query);
-        }, 250),
+        }, 500),
       })
     } else {
       this.setState({ showResults: false });
@@ -119,7 +128,10 @@ class SearchMovieInternal extends React.Component {
     try {
       const response = await axios.get(url);
       const results = response.data.results;
-      this.setState({ results });
+      this.setState({ results, MovieNotFound: false });
+      if (results.length === 0) {
+        this.setState({ MovieNotFound: true })
+      }
     } catch (error) {
       console.log(error);
     }
@@ -157,10 +169,15 @@ class SearchMovieInternal extends React.Component {
         />
         {
           this.state.showResults && 
-          <PartialSearchResults
+          <SearchResults
             results={this.state.results}
             onClick={this.onClickResult}
           />
+        }
+        { 
+          this.state.showResults
+          && this.state.MovieNotFound
+          && <MovieNotFound />
         }
       </div>
     );

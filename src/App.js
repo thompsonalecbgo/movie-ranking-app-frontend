@@ -43,7 +43,7 @@ class App extends React.Component {
           <Route exact path="/">
             <Home message={this.state.message} />
           </Route>
-          <Route path="/search/">
+          <Route exact path="/search/">
             <SearchMovie 
               action="/top-movies/new/"
             />

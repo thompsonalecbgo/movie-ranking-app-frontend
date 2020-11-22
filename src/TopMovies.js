@@ -52,6 +52,7 @@ class TopMoviesInternal extends React.Component {
     axiosInstance
       .get(`/top-movies/${id}/`)
       .then((response) => {
+        console.log(response)
         this.setState({ movies: response.data.movie });
       })
       .catch((error) => {
