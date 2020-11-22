@@ -26,7 +26,7 @@ class SearchForm extends React.Component {
     e.preventDefault();
   }
   clearInput(){
-    this.setState = { value: "" };
+    this.setState({ value: "" });
     if (this.props.getValue) {
       this.props.getValue("")
     }
@@ -44,7 +44,7 @@ class SearchForm extends React.Component {
             onChange={this.handleChange}
           />
         </label>
-        <input type="submit" value="Search" />
+        <input type="submit" value="Search" id="search-button" />
       </form>
     );
   }
@@ -69,7 +69,7 @@ function PartialSearchResults(props) {
   const results = props.results.slice(0, 5)
   return (
     <div>
-      <ul id="search-results">
+      <ul id="partial-search-results">
         {results.map((result) => (
           <SearchResult
             key={result.id.toString()}
@@ -89,6 +89,7 @@ class SearchMovieInternal extends React.Component {
       query: "",
       typingTimeout: "",
       results: [],
+      showResults: false,
     };
     this.getQuery = this.getQuery.bind(this);
     this.getResults = this.getResults.bind(this);
@@ -103,12 +104,13 @@ class SearchMovieInternal extends React.Component {
     this.setState({ query })
     if (query) {
       this.setState({
+        showResults: true,
         typingTimeout: setTimeout(() => {
           this.getResults(query);
         }, 250),
       })
     } else {
-      this.setState({ results: [] });
+      this.setState({ showResults: false });
     }
   }
 
@@ -132,8 +134,8 @@ class SearchMovieInternal extends React.Component {
         poster_path: `https://image.tmdb.org/t/p/w200${result.poster_path}`,
       })
       .then((response) => {
-        this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
         this.searchFormRef.current.clearInput();
+        this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
         if (this.props.getSelected) {
           this.props.getSelected(response.data)
         }
@@ -153,10 +155,13 @@ class SearchMovieInternal extends React.Component {
           ref={this.searchFormRef}
           getValue={this.getQuery}
         />
-        <PartialSearchResults
-          results={this.state.results}
-          onClick={this.onClickResult}
-        />
+        {
+          this.state.showResults && 
+          <PartialSearchResults
+            results={this.state.results}
+            onClick={this.onClickResult}
+          />
+        }
       </div>
     );
   }
