@@ -62,16 +62,78 @@ function Movies(props) {
   );
 }
 
+class TopMoviesHeader extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editTitle: false,
+      value: "",
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
+  }
+  componentDidMount() {
+    this.setState({ value: this.props.title })
+  }
+  handleChange(e) {
+    this.setState({ value: e.target.value });
+  }
+  handleDoubleClick() {
+    this.setState({ editTitle: true });
+  }
+  handleBlur(e) {
+    this.setState({ editTitle: false });
+    if (this.props.changeTitle) {
+      this.props.changeTitle(e.target.value)
+    }
+  }
+  render() {
+    return (
+      <div>
+        <div>
+          {this.state.editTitle ? (
+            <input
+              className="top-movies-title edit"
+              type="text"
+              placeholder="Add title"
+              value={this.state.value}
+              onChange={this.handleChange}
+              onBlur={this.handleBlur}
+            />
+          ) : (
+            <div
+              className="top-movies-title"
+              onDoubleClick={this.handleDoubleClick}
+            >
+              {this.state.value ? this.state.value : "Add title"}
+            </div>
+          )}
+        </div>
+        <button
+          className="delete-top-movies"
+          onClick={this.props.deleteTopMovies}
+        >
+          Delete Top Movies
+        </button>
+      </div>
+    );
+  }
+}
+
 class TopMoviesInternal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       id: "",
       movies: [],
+      title: "",
     };
     this.getSelected = this.getSelected.bind(this);
     this.moveRank = this.moveRank.bind(this);
     this.deleteRank = this.deleteRank.bind(this);
+    this.deleteTopMovies = this.deleteTopMovies.bind(this);
+    this.changeTitle = this.changeTitle.bind(this);
   }
 
   componentDidMount() {
@@ -81,7 +143,10 @@ class TopMoviesInternal extends React.Component {
       .get(`/top-movies/${id}/`)
       .then((response) => {
         console.log(response);
-        this.setState({ movies: response.data.movie });
+        this.setState({
+          movies: response.data.movie,
+          title: response.data.title,
+        });
       })
       .catch((error) => {
         console.log(error.message);
@@ -123,12 +188,43 @@ class TopMoviesInternal extends React.Component {
       });
   }
 
+  deleteTopMovies() {
+    axiosInstance
+      .delete(`/top-movies/${this.state.id}/`)
+      .then((response) => {
+        console.log(response);
+        this.props.history.push(`/`);
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+
+  changeTitle(title) {
+    axiosInstance
+      .put(`/top-movies/${this.state.id}/`, {
+        title: title
+      })
+      .then((response) => {
+        console.log(response);
+        this.setState({ movies: response.data.movie });
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  }
+
   render() {
     return (
       <div>
         <SearchMovie
           action={`/top-movies/${this.state.id}/add/`}
           getSelected={this.getSelected}
+        />
+        <TopMoviesHeader
+          title={this.state.title}
+          deleteTopMovies={this.deleteTopMovies}
+          changeTitle={this.changeTitle}
         />
         <Movies
           movies={this.state.movies}

@@ -8,16 +8,16 @@ function MovieList(props) {
   const movieList = props.value;
   const previewMovies = movieList.movie.slice(0, 3);
   return (
-    <div className="top-movie-list">
-      <Link to={`/top-movies/${movieList.id}`}>
-        <p>{movieList.id}</p>
+    <Link to={`/top-movies/${movieList.id}`} className="top-movie-list">
+      <div>
+        <div>{movieList.title}</div>
         <ul>
           {previewMovies.map((previewMovie) => (
             <li key={previewMovie.id}>{previewMovie.title}</li>
           ))}
         </ul>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 }
 
