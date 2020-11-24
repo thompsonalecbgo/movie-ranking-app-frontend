@@ -110,12 +110,14 @@ class SearchMovieInternal extends React.Component {
       query,
       results: [],
       showResults: false,
-      typingTimeout: setTimeout(() => {
-        this.getResults(query);
-      }, 500),
     });
     if (query) {
-      this.setState({ showResults: true });
+      this.setState({
+        showResults: true,
+        typingTimeout: setTimeout(() => {
+          this.getResults(query);
+        }, 500),
+      });
     }
   }
 
