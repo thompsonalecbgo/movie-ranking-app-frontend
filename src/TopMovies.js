@@ -1,45 +1,49 @@
 import React from "react";
 import { withRouter, Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faAngleUp,
+  faAngleDown,
+  faTimes,
+  faPen,
+} from "@fortawesome/free-solid-svg-icons";
 
 import axiosInstance from "./axiosInstance";
 import { SearchMovie } from "./SearchMovie";
 import { extractDate } from "./utils";
+import "./TopMovies.css";
 
 function Movie(props) {
   const movie = props.value;
   const title = movie.title;
   const release_date = extractDate(movie.release_date);
-  const poster_path = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
+  const poster_path = movie.poster_path;
   const rank = movie.rank;
   return (
-    <li>
-      <div>
-        <button
-          className="move-rank-up"
-          onClick={() => props.moveRank(movie, "move-rank-up")}
-        >
-          Move Up
-        </button>
-        &ensp;
-        <button
-          className="move-rank-down"
-          onClick={() => props.moveRank(movie, "move-rank-down")}
-        >
-          Move Down
-        </button>
-        &ensp;
-        <span className="movie-rank">{rank}</span>
-        &ensp;
-        <span className="movie-detail">
-          {/* <img alt={title} src={poster_path} /> */}
-          {title} ({release_date})
-        </span>
-        &ensp;
-        <button className="delete-rank" onClick={() => props.deleteRank(movie)}>
-          Delete
-        </button>
-      </div>
-    </li>
+    <div className="movie-block">
+      <FontAwesomeIcon
+        icon={faAngleUp}
+        size="lg"
+        className="move-rank-up movie-btn"
+        onClick={() => props.moveRank(movie, "move-rank-up")}
+      />
+      <FontAwesomeIcon
+        icon={faAngleDown}
+        size="lg"
+        className="move-rank-down movie-btn"
+        onClick={() => props.moveRank(movie, "move-rank-down")}
+      />
+      <span className="movie-rank">{rank}</span>
+      <span className="movie-title">
+        {title} ({release_date})
+      </span>
+      <img alt={title} src={poster_path} className="movie-poster" />
+      <FontAwesomeIcon
+        icon={faTimes}
+        className="delete-rank movie-btn"
+        onClick={() => props.deleteRank(movie)}
+      />
+    </div>
   );
 }
 
@@ -47,17 +51,15 @@ function Movies(props) {
   const movies = props.movies;
   movies.sort((a, b) => a.rank - b.rank);
   return (
-    <div>
-      <ul id="top-movies">
-        {movies.map((movie) => (
-          <Movie
-            key={movie.id.toString()}
-            value={movie}
-            moveRank={props.moveRank}
-            deleteRank={props.deleteRank}
-          />
-        ))}
-      </ul>
+    <div id="top-movies">
+      {movies.map((movie) => (
+        <Movie
+          key={movie.id.toString()}
+          value={movie}
+          moveRank={props.moveRank}
+          deleteRank={props.deleteRank}
+        />
+      ))}
     </div>
   );
 }
@@ -76,7 +78,7 @@ class TopMoviesTitleInput extends React.Component {
         ref={this.inputRef}
         className="top-movies-title edit"
         type="text"
-        placeholder="Add title"
+        placeholder="Add Title"
         value={this.props.value}
         onChange={this.props.onChange}
         onBlur={this.props.onBlur}
@@ -91,16 +93,13 @@ class TopMoviesHeader extends React.Component {
     this.state = {
       editTitle: false,
     };
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
+    this.triggerChangeTitle = this.triggerChangeTitle.bind(this);
     this.handleChangeTitle = this.handleChangeTitle.bind(this);
     this.handleSubmitChangeTitle = this.handleSubmitChangeTitle.bind(this);
   }
 
-  handleDoubleClick() {
+  triggerChangeTitle() {
     this.setState({ editTitle: true });
-    if (this.inputRef) {
-      this.inputRef.current.focus();
-    }
   }
 
   handleChangeTitle(e) {
@@ -118,8 +117,8 @@ class TopMoviesHeader extends React.Component {
 
   render() {
     return (
-      <div>
-        <div>
+      <div id="top-movies-header">
+        <span>
           {this.state.editTitle ? (
             <TopMoviesTitleInput
               value={this.props.title}
@@ -127,20 +126,25 @@ class TopMoviesHeader extends React.Component {
               onBlur={this.handleSubmitChangeTitle}
             />
           ) : (
-            <div
-              className="top-movies-title"
-              onDoubleClick={this.handleDoubleClick}
-            >
-              {this.props.title ? this.props.title : "Add title"}
-            </div>
+            <span onDoubleClick={this.triggerChangeTitle}>
+              {this.props.title ? (
+                <span>
+                  <span className="top-movies-title">{this.props.title}</span>
+                  <FontAwesomeIcon
+                    icon={faPen}
+                    size="sm"
+                    className="edit-top-movies-title"
+                    onClick={this.triggerChangeTitle}
+                  />
+                </span>
+              ) : (
+                <span className="top-movies-title placeholder">
+                  (double click to add title)
+                </span>
+              )}
+            </span>
           )}
-        </div>
-        <button
-          className="delete-top-movies"
-          onClick={this.props.deleteTopMovies}
-        >
-          Delete Top Movies
-        </button>
+        </span>
       </div>
     );
   }
@@ -157,7 +161,7 @@ class TopMoviesInternal extends React.Component {
     this.getSelected = this.getSelected.bind(this);
     this.moveRank = this.moveRank.bind(this);
     this.deleteRank = this.deleteRank.bind(this);
-    this.deleteTopMovies = this.deleteTopMovies.bind(this);
+    // this.deleteTopMovies = this.deleteTopMovies.bind(this);
     this.changeTitle = this.changeTitle.bind(this);
     this.submitChangeTitle = this.submitChangeTitle.bind(this);
   }
@@ -211,17 +215,6 @@ class TopMoviesInternal extends React.Component {
       });
   }
 
-  deleteTopMovies() {
-    axiosInstance
-      .delete(`/top-movies/${this.state.id}/`)
-      .then((response) => {
-        this.props.history.push(`/`);
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  }
-
   changeTitle(title) {
     this.setState({ title: title });
   }
@@ -245,12 +238,13 @@ class TopMoviesInternal extends React.Component {
         <SearchMovie
           action={`/top-movies/${this.state.id}/add/`}
           getSelected={this.getSelected}
+          searchLabel={"Add Movie"}
         />
         <TopMoviesHeader
           title={this.state.title}
           changeTitle={this.changeTitle}
           submitChangeTitle={this.submitChangeTitle}
-          deleteTopMovies={this.deleteTopMovies}
+          // deleteTopMovies={this.deleteTopMovies}
         />
         <Movies
           movies={this.state.movies}

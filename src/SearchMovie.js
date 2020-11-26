@@ -1,10 +1,10 @@
 import React from "react";
-import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
 
 import axiosInstance from "./axiosInstance";
 import { extractDate } from "./utils";
+import "./SearchMovie.css";
 
 const TMDBApiKey = "ff8183068c00734a3d6c9ae5281fe108";
 
@@ -33,35 +33,51 @@ class SearchForm extends React.Component {
   }
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Search Movie:
+      <form id="search-form" onSubmit={this.handleSubmit}>
+        <label>{this.props.searchLabel}</label>
+        <span id="search">
           <input
             id="search-bar"
             type="text"
             placeholder="Search for your favorite movies!"
             value={this.state.value}
             onChange={this.handleChange}
-          />
-        </label>
-        {/* <input type="submit" value="Search" id="search-button" /> */}
+            autoComplete="off"
+            onBlur={this.props.handleBlur}
+            onFocus={this.props.handleFocus}
+          ></input>
+          {this.props.children}
+        </span>
       </form>
     );
   }
+}
+
+function MovieNotFound(props) {
+  return <div className="search-result">Movie not found.</div>;
 }
 
 function SearchResult(props) {
   const result = props.value;
   const title = result.title;
   const release_date = extractDate(result.release_date);
-  const poster_path = `https://image.tmdb.org/t/p/w200${result.poster_path}`;
+  const poster = result.poster_path;
+  const poster_path = `https://image.tmdb.org/t/p/w200${poster}`;
   return (
-    <li onClick={props.onClick}>
+    <div onClick={props.handleClickResult} className="search-result">
       <div>
-        {/* <img alt={title} src={poster_path} /> */}
-        {title} ({release_date})
+        <img
+          className="search-image"
+          alt={title}
+          src={poster_path}
+          width={50}
+          onError={(e) => (e.target.style.display = "none")}
+        />
+        <p className="search-text">
+          {title} ({release_date})
+        </p>
       </div>
-    </li>
+    </div>
   );
 }
 
@@ -69,21 +85,21 @@ function SearchResults(props) {
   const results = props.results;
   return (
     <div>
-      <ul id="search-results">
-        {results.map((result) => (
-          <SearchResult
-            key={result.id.toString()}
-            value={result}
-            onClick={() => props.onClick(result)}
-          />
-        ))}
-      </ul>
+      <div id="search-results">
+        {props.movieNotFound ? (
+          <MovieNotFound />
+        ) : (
+          results.map((result) => (
+            <SearchResult
+              key={result.id.toString()}
+              value={result}
+              handleClickResult={() => props.handleClickResult(result)}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
-}
-
-function MovieNotFound(props) {
-  return <div>Movie not found.</div>;
 }
 
 class SearchMovieInternal extends React.Component {
@@ -98,7 +114,7 @@ class SearchMovieInternal extends React.Component {
     };
     this.getQuery = this.getQuery.bind(this);
     this.getResults = this.getResults.bind(this);
-    this.onClickResult = this.onClickResult.bind(this);
+    this.handleClickResult = this.handleClickResult.bind(this);
     this.searchFormRef = React.createRef();
   }
 
@@ -110,6 +126,7 @@ class SearchMovieInternal extends React.Component {
       query,
       results: [],
       showResults: false,
+      movieNotFound: false,
     });
     if (query) {
       this.setState({
@@ -135,7 +152,7 @@ class SearchMovieInternal extends React.Component {
     }
   }
 
-  onClickResult(result) {
+  handleClickResult(result) {
     axiosInstance
       .post(this.props.action, {
         tmdb_id: result.id,
@@ -158,16 +175,25 @@ class SearchMovieInternal extends React.Component {
   render() {
     return (
       <div>
-        <SearchForm ref={this.searchFormRef} getValue={this.getQuery} />
-        {this.state.showResults && (
-          <SearchResults
-            results={this.state.results}
-            onClick={this.onClickResult}
-          />
-        )}
-        {this.state.showResults && this.state.movieNotFound && (
-          <MovieNotFound />
-        )}
+        <SearchForm
+          ref={this.searchFormRef}
+          getValue={this.getQuery}
+          searchLabel={this.props.searchLabel}
+          handleBlur={() => {
+            setTimeout(() => this.setState({ showResults: false }), 500);
+          }}
+          handleFocus={() => {
+            this.setState({ showResults: true });
+          }}
+        >
+          {this.state.showResults && (
+            <SearchResults
+              results={this.state.results}
+              movieNotFound={this.state.movieNotFound}
+              handleClickResult={this.handleClickResult}
+            />
+          )}
+        </SearchForm>
       </div>
     );
   }
