@@ -7,6 +7,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { TopMovies } from "./TopMovies";
 import { TopMovieLists } from "./TopMovieLists";
 import "./App.css";
+import tmdbLogo from "./tmdb-logo.svg";
 
 export function Home(props) {
   return (
@@ -45,7 +46,11 @@ function App(props) {
           <Route path="/top-movies/:id">
             <h3>
               <Link to="/" class="return">
-                <FontAwesomeIcon icon={faArrowLeft} size="sm" style={{marginRight :10 }}/>
+                <FontAwesomeIcon
+                  icon={faArrowLeft}
+                  size="sm"
+                  style={{ marginRight: 10 }}
+                />
                 return
               </Link>
             </h3>
@@ -53,6 +58,13 @@ function App(props) {
           </Route>
         </Switch>
       </div>
+      <footer>
+        <p style={{fontSize: "0.75rem"}}>
+          This product uses the TMDb API but is not endorsed or certified by
+          TMDb
+        </p>
+        <img src={tmdbLogo} width={120} style={{marginBottom: "10px"}}/>
+      </footer>
     </div>
   );
 }

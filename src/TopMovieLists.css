@@ -1,7 +1,7 @@
 #no-top-movies {
     color: #b7b7a4;
     width: 350px;
-    margin: 12rem auto 0;
+    margin: 13rem auto;
 }
 
 #top-movie-lists {
@@ -24,7 +24,7 @@
 }
 
 .top-movie-list:hover {
-    border: 2px black solid; 
+    box-shadow: 5px 5px #eddcd2;
 }
 
 .top-movie-list a {

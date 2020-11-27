@@ -40,9 +40,9 @@ class SearchForm extends React.Component {
             id="search-bar"
             type="text"
             placeholder="Search for your favorite movies!"
+            autoComplete="off"
             value={this.state.value}
             onChange={this.handleChange}
-            autoComplete="off"
             onBlur={this.props.handleBlur}
             onFocus={this.props.handleFocus}
           ></input>
@@ -180,7 +180,7 @@ class SearchMovieInternal extends React.Component {
           getValue={this.getQuery}
           searchLabel={this.props.searchLabel}
           handleBlur={() => {
-            setTimeout(() => this.setState({ showResults: false }), 500);
+            setTimeout(() => this.setState({ showResults: false }), 250);
           }}
           handleFocus={() => {
             this.setState({ showResults: true });

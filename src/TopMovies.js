@@ -1,5 +1,5 @@
 import React from "react";
-import { withRouter, Link } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleUp,
@@ -161,7 +161,6 @@ class TopMoviesInternal extends React.Component {
     this.getSelected = this.getSelected.bind(this);
     this.moveRank = this.moveRank.bind(this);
     this.deleteRank = this.deleteRank.bind(this);
-    // this.deleteTopMovies = this.deleteTopMovies.bind(this);
     this.changeTitle = this.changeTitle.bind(this);
     this.submitChangeTitle = this.submitChangeTitle.bind(this);
   }
@@ -244,7 +243,6 @@ class TopMoviesInternal extends React.Component {
           title={this.state.title}
           changeTitle={this.changeTitle}
           submitChangeTitle={this.submitChangeTitle}
-          // deleteTopMovies={this.deleteTopMovies}
         />
         <Movies
           movies={this.state.movies}

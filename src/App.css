@@ -9,6 +9,7 @@ body {
   margin: auto;
   min-width: 700px;
   width: 50%;
+  min-height: 700px;
   padding: 2rem 0;
 }
 
@@ -17,6 +18,12 @@ body {
   display: block;
   color: #cb997e;
   text-decoration: none;  
+}
+
+#welcome-banner {
+  width: 600px;
+  margin: auto;
+  margin-bottom: 2rem;
 }
 
 .return {
@@ -29,10 +36,4 @@ body {
 
 .return:hover {
   opacity: 1;
-}
-
-#welcome-banner {
-  width: 600px;
-  margin: auto;
-  margin-bottom: 2rem;
 }
