@@ -1,0 +1,88 @@
+#top-movies {
+    display: inline-block;
+    border-collapse:collapse;
+    margin-top: 2rem;
+}
+
+.movie-block {
+    display: table-row;
+    background-color: white;
+    border: 1px black solid;  
+    text-align: justify;  
+}
+
+.movie-rank {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 4rem;
+    margin-left: 20px;
+}
+
+.movie-title {
+    text-align: left;
+    display: inline-block;
+    vertical-align: middle;
+    width: 300px;
+    margin-left: 20px
+}
+
+.movie-poster {
+    display: inline-block;
+    vertical-align: middle;
+    width: 70px;
+}
+
+.movie-btn {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 20px;
+    opacity: 0.5;
+}
+
+.movie-btn:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.movie-btn:last-child{
+    margin-right: 20px;
+}
+
+.move-rank-up {
+    color: #cb997e;
+}
+
+.move-rank-down {
+    color: #a5a58d;
+}
+
+#top-movies-header {
+    margin-top: 2rem;
+}
+
+.top-movies-title {
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.top-movies-title.placeholder {
+    opacity: 0.5;
+}
+
+.top-movies-title.edit {
+    border: 1px black solid;
+    outline: none;
+    width: 120px;
+    font-size: 15px;
+    padding: 8px;
+}
+
+.edit-top-movies-title {
+    opacity: 0.5;
+}
+
+.edit-top-movies-title:hover {
+    opacity: 1;
+    cursor: pointer;
+}
