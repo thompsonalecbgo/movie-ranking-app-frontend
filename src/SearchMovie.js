@@ -19,16 +19,16 @@ class SearchForm extends React.Component {
   handleChange(e) {
     this.setState({ value: e.target.value });
     if (this.props.getValue) {
-      this.props.getValue(e.target.value);
+      this.props.getValue(e.target.value)
     }
   }
   handleSubmit(e) {
     e.preventDefault();
   }
-  clearInput() {
-    this.setState({ value: "" });
+  clearInput(){
+    this.setState = { value: "" };
     if (this.props.getValue) {
-      this.props.getValue("");
+      this.props.getValue("")
     }
   }
   render() {
@@ -163,8 +163,9 @@ class SearchMovieInternal extends React.Component {
       .then((response) => {
         this.searchFormRef.current.clearInput();
         this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
+        this.searchFormRef.current.clearInput();
         if (this.props.getSelected) {
-          this.props.getSelected(response.data);
+          this.props.getSelected(response.data)
         }
       })
       .catch((error) => {
