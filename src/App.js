@@ -45,7 +45,7 @@ function App(props) {
           </Route>
           <Route path="/top-movies/:id">
             <h3>
-              <Link to="/" class="return">
+              <Link to="/" className="return">
                 <FontAwesomeIcon
                   icon={faArrowLeft}
                   size="sm"

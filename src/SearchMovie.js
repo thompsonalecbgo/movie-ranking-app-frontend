@@ -1,7 +1,6 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
-import { useSelector, useDispatch } from 'react-redux'
 
 import axiosInstance from "./axiosInstance";
 import { extractDate } from "./utils";
@@ -15,25 +14,15 @@ class SearchForm extends React.Component {
     this.state = { value: "" };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.clearInput = this.clearInput.bind(this);
   }
   handleChange(e) {
     this.setState({ value: e.target.value });
-    if (this.props.getValue) {
-      this.props.getValue(e.target.value);
+    if (this.props.getQuery) {
+      this.props.getQuery(e.target.value);
     }
   }
   handleSubmit(e) {
     e.preventDefault();
-    if (this.props.onSubmit) {
-      this.props.onSubmit();
-    }
-  }
-  clearInput() {
-    this.setState({ value: "" });
-    if (this.props.getValue) {
-      this.props.getValue("");
-    }
   }
   render() {
     return (
@@ -112,7 +101,6 @@ class SearchMovieInternal extends React.Component {
     this.state = {
       query: "",
       typingTimeout: "",
-      showPartialResults: false,
       results: [],
       showResults: false,
       movieNotFound: false,
@@ -120,7 +108,6 @@ class SearchMovieInternal extends React.Component {
     this.getQuery = this.getQuery.bind(this);
     this.getResults = this.getResults.bind(this);
     this.handleClickResult = this.handleClickResult.bind(this);
-    this.searchFormRef = React.createRef();
   }
 
   getQuery(query) {
@@ -166,40 +153,23 @@ class SearchMovieInternal extends React.Component {
         poster_path: `https://image.tmdb.org/t/p/w200${result.poster_path}`,
       })
       .then((response) => {
-        this.searchFormRef.current.clearInput();
-        this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);
+        this.setState({ showResults: false })
         if (this.props.getSelected) {
           this.props.getSelected(response.data);
         }
-        this.searchFormRef.current.clearInput();
-        this.setState({ showResults: false })
+        this.props.history.push(`/top-movies/${response.data.top_movies.id}/`);        
       })
       .catch((error) => {
         console.log(error.message);
       });
   }
 
-  onSearch() {
-    // alert("clicked")
-    this.getResults(this.state.query).then((res) => {
-      this.setState((state) => ({
-        showPartialResults: false,
-        showResults: true,
-        lastResults: state.results,
-      }));
-      if (this.props.isShowingResults) {
-        this.props.isShowingResults(true);
-      }
-    });
-  }
-
   render() {
     return (
       <div>
         <SearchForm
-          ref={this.searchFormRef}
-          getValue={this.getQuery}
-          searchLabel={this.props.searchLabel}
+        searchLabel={this.props.searchLabel}
+          getQuery={this.getQuery}
           handleBlur={() => {
             setTimeout(() => this.setState({ showResults: false }), 250);
           }}
