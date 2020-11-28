@@ -15,7 +15,7 @@ function MovieList(props) {
       <Link to={`/top-movies/${movieList.id}`}>
         <div className="top-movie-list-title preview">{movieList.title}</div>
         {previewMovies.map((previewMovie) => (
-          <div className="top-movie preview">
+          <div className="top-movie preview" key={previewMovie.id}>
             <div className="top-movie-rank preview">{previewMovie.rank}</div>
             <div className="top-movie-title preview" key={previewMovie.id}>
               {previewMovie.title}
@@ -68,7 +68,6 @@ class TopMovieListsInternal extends React.Component {
     axiosInstance
       .get(`/top-movies/`)
       .then((response) => {
-        console.log(response);
         this.setState({ movieLists: response.data });
       })
       .catch((error) => {
