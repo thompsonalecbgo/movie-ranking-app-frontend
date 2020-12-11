@@ -63,7 +63,7 @@ function App(props) {
           This product uses the TMDb API but is not endorsed or certified by
           TMDb
         </p>
-        <img src={tmdbLogo} width={120} style={{marginBottom: "10px"}}/>
+        <img alt="TMDB logo" src={tmdbLogo} width={120} style={{marginBottom: "10px"}}/>
       </footer>
     </div>
   );
